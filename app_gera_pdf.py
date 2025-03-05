@@ -47,7 +47,7 @@ if st.button("Gerar Pdf"):
         info_user.setFont("Times-Bold",12)
         info_user.textOut("Valor total do serviço ")
         info_user.setFont("Times-Roman",12)
-        info_user.textLine(f"R${valor_serviço},00")
+        info_user.textLine(f"R${valor_serviço}")
         
         info_user.setFont("Times-Bold",12)
         info_user.textOut("Forma de pagamento:")
