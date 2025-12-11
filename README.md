@@ -5,7 +5,7 @@ Este projeto tem como objetivo principal explorar a geração de PDFs utilizando
 ## Sobre o Autor
 
 **Edilson Alves da Silva**
-Graduando do 3º período de Ciência da Computação na Universidade Federal de Catalão (UFCAT).
+Graduando do 4º período de Ciência da Computação na Universidade Federal de Catalão (UFCAT).
 
 ## Funcionalidades
 
