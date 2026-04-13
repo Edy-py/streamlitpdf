@@ -1,104 +1,129 @@
 import streamlit as st
 from reportlab.pdfgen import canvas
 from io import BytesIO
+from datetime import datetime
 
-st.title(" Gerar Orçamento ")
+st.title("Gerar Orçamento")
 
 parcela = None
-# coletar info do usuário
+
+# Inputs
 nome = st.text_input("Nome do cliente:")
 email = st.text_input("Email do cliente:")
-descricao = st.text_area("Descrição do Serviço:")  # Usando text_area para aceitar mais texto
-valor_serviço = st.text_input("Valor total:")
-forma_pagamento = st.selectbox("Forma de pagamento:",["Pix/Dinheiro","Débito","Crédito à vista","Crédito parcelado"],index=None,placeholder="Selecione uma forma de pagamento")
+descricao = st.text_area("Descrição do Serviço:")
+valor_servico = st.text_input("Valor total:")
+forma_pagamento = st.selectbox(
+    "Forma de pagamento:",
+    ["Pix/Dinheiro", "Débito", "Crédito à vista", "Crédito parcelado"],
+    index=None,
+    placeholder="Selecione uma forma de pagamento"
+)
+
 if forma_pagamento == "Crédito parcelado":
-    parcela = st.selectbox("Quantidade de parcelas",["2x","3x"],index=None,placeholder="Selecione o n° de parcelas")
+    parcela = st.selectbox(
+        "Quantidade de parcelas",
+        ["2x", "3x"],
+        index=None,
+        placeholder="Selecione o n° de parcelas"
+    )
 
 if st.button("Gerar Pdf"):
-    if nome.strip() or email.strip() or descricao.strip() or valor_serviço.strip():
+    if nome.strip() and descricao.strip() and valor_servico.strip():
+
         buffer = BytesIO()
         pdf = canvas.Canvas(buffer)
 
-        # destacar titulo
-        pdf.setFont("Helvetica-Bold",16)
-        pdf.drawString(100,800, "EDSON PORTÕES")
-        pdf.setFont("Helvetica",12)
-        pdf.drawString(100,780, "CNPJ:")
-        pdf.drawString(250,780, "Telefone:")
-        pdf.setFont("Helvetica-Bold",12)
-        pdf.drawString(100,760, "35.778.201/0001-07")
-        pdf.drawString(250,760,"61 9 8560-1644")
+        # 🔝 HEADER
+        pdf.setFont("Helvetica-Bold", 18)
+        pdf.drawString(100, 800, "EDSON PORTÕES")
 
-        # inserir info user
-        info_user = pdf.beginText(100,700)
-        info_user.setTextOrigin(100,700)
-        info_user.setLeading(14)
-        
-        info_user.setFont("Times-Bold",12)
-        info_user.textOut("Nome: ")
-        info_user.setFont("Times-Roman",12)
-        info_user.textLine(nome)
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(100, 780, "CNPJ: 35.778.201/0001-07")
+        pdf.drawString(300, 780, "Telefone: (61) 98560-1644")
 
-        info_user.setFont("Times-Bold",12)
-        info_user.textOut("Email do Cliente: ")
-        info_user.setFont("Times-Roman",12)
-        info_user.textLine(email)
+        # Linha separadora
+        pdf.line(100, 770, 500, 770)
 
-        info_user.setFont("Times-Bold",12)
-        info_user.textOut("Valor total do serviço ")
-        info_user.setFont("Times-Roman",12)
-        info_user.textLine(f"R${valor_serviço}")
-        
-        info_user.setFont("Times-Bold",12)
-        info_user.textOut("Forma de pagamento:")
-        info_user.setFont("Times-Roman",12)
+        # 📅 Data
+        pdf.setFont("Helvetica", 10)
+        data_atual = datetime.now().strftime("%d/%m/%Y")
+        pdf.drawString(400, 750, f"Data: {data_atual}")
 
-        if parcela is not None:
-            info_user.textLine(f"{forma_pagamento}   N° de parcelas {parcela}")
+        # 👤 CLIENTE
+        y = 730
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(100, y, "Cliente:")
+
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(160, y, nome)
+
+        y -= 20
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(100, y, "Email:")
+
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(150, y, email)
+
+        # 💰 VALOR (DESTAQUE)
+        y -= 40
+        pdf.setFont("Helvetica-Bold", 14)
+        pdf.drawString(100, y, f"Valor Total: R$ {valor_servico}")
+
+        # 💳 PAGAMENTO
+        y -= 25
+        pdf.setFont("Helvetica", 12)
+
+        if parcela:
+            pagamento_texto = f"{forma_pagamento} ({parcela})"
         else:
-            info_user.textLine(forma_pagamento)
+            pagamento_texto = forma_pagamento
 
-        pdf.drawText(info_user)
+        pdf.drawString(100, y, f"Forma de pagamento: {pagamento_texto}")
 
-        # Configurando o textObject para quebra automática de linha
-        text_object = pdf.beginText(100, info_user.getY() - 14)  # Ajusta a posição para continuar abaixo
-        text_object.setFont("Times-Roman", 12)
-        text_object.setTextOrigin(100, info_user.getY() - 14)
-        text_object.setLeading(14)  # Espaçamento entre linhas
+        # 📝 DESCRIÇÃO (COM CAIXA)
+        y -= 40
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(100, y, "Descrição do Serviço:")
 
-        # Adicionando a descrição e quebrando a linha automaticamente
-        text_object.setFont("Times-Bold",12)
-        text_object.textOut("Descrição do Serviço: ")
-        text_object.setFont("Times-Roman",12)
+        # Caixa
+        box_y = y - 110
+        pdf.rect(95, box_y, 420, 100)
 
-        # Wrap text to ensure it fits within the margin (adjust max_width as needed)
-        max_width = 400  # Ajuste a largura máxima para caber dentro da página
-        wrapped_text = []
-        line = ''
-        
-        # Utiliza canvas.stringWidth() para calcular o comprimento do texto
-        for word in descricao.split(' '):
-            # Verifica se o texto da linha atual não ultrapassa a largura máxima
-            if pdf.stringWidth(line + ' ' + word) < max_width:
-                line += ' ' + word
-            else:
-                # Se ultrapassar, adiciona a linha ao wrapped_text e começa uma nova linha
-                wrapped_text.append(line)
-                line = word
-        wrapped_text.append(line)  # Adiciona a última linha
+        text_object = pdf.beginText(100, y - 20)
+        text_object.setFont("Helvetica", 11)
+        text_object.setLeading(14)
 
-        # Desenhando cada linha quebrada no PDF
-        for line in wrapped_text:
-            text_object.textLine(line)
+        # 🔥 CORREÇÃO DO ENTER
+        linhas = descricao.split('\n')
 
-        # Desenhando o texto no PDF
+        max_width = 380
+
+        for linha in linhas:
+            palavras = linha.split(' ')
+            linha_atual = ""
+
+            for palavra in palavras:
+                if pdf.stringWidth(linha_atual + " " + palavra) < max_width:
+                    linha_atual += " " + palavra
+                else:
+                    text_object.textLine(linha_atual.strip())
+                    linha_atual = palavra
+
+            text_object.textLine(linha_atual.strip())
+
         pdf.drawText(text_object)
 
-        # Finaliza o PDF
+        # ✍️ RODAPÉ
+        pdf.line(100, 120, 500, 120)
+
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(100, 100, "EDSON PORTÕES")
+        pdf.drawString(100, 85, "Qualidade e segurança para sua casa")
+
         pdf.save()
         buffer.seek(0)
 
-        # Baixar o PDF gerado
-        st.download_button("Baixar PDF", buffer, f"Orçamento_{nome}.pdf")
+        st.download_button("Baixar PDF", buffer, f"Orcamento_{nome}.pdf")
+
     else:
         st.warning("Preencha todos os dados antes de gerar o PDF.")
