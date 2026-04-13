@@ -3,7 +3,9 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 from datetime import datetime
 
-st.title("Gerar Orçamento")
+st.set_page_config(page_title="Gerar Orçamento Edson Portões", page_icon="📄", layout="centered")
+st.title("Edson Portões - Gerar Orçamento")
+
 
 parcela = None
 
