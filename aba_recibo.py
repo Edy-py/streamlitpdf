@@ -114,7 +114,7 @@ def renderizar():
             pdf_rec.drawString(60, y_final, "Para maior clareza, firmamos o presente recibo para que produza os seus efeitos legais.")
 
             meses = ["", "janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
-            local_data = f"Catalão - GO, {data_recibo.day} de {meses[data_recibo.month]} de {data_recibo.year}."
+            local_data = f"Brazlândia - DF, {data_recibo.day} de {meses[data_recibo.month]} de {data_recibo.year}."
             pdf_rec.setFont("Helvetica-Oblique", 12)
             pdf_rec.drawCentredString(largura / 2, y_final - 40, local_data)
 
